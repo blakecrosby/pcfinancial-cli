@@ -5,12 +5,15 @@ A Command Line Interface to PC Financial. View account balance, pay bills, trans
 ## Why?
 I created this script so that I could automate some functions, such as e-mailing me a daily transaction report or to warn me when my account balance drops below a threshold.
 
-It was also a good exercising in reverse engineering and I'm using the same interface as Android app does.
+It was also a good exercise in reverse engineering. All of the API-like calls I made are the same as the ones from the PC Financial Android App. The web application shouldn't be able to tell the difference between calls made by this tool and ones by the Android app.
 
 ## Requirements
 The script was written in PHP, so you'll need to have PHP installed.
 
 ## Usage & Examples
+
+***BE SMART*** Please don't run this script on a shared server. If anyone else can access your bash history, or crontab, or anywhere else you might have set this script up they can also access your bank account.
+
 Running the tool without any parameters will give you some details on command line switches:
 
 ```
