@@ -12,7 +12,7 @@ The script was written in PHP, so you'll need to have PHP installed.
 
 ## Usage & Examples
 
-***BE SMART*** Please don't run this script on a shared server. If anyone else can access your bash history, or crontab, or anywhere else you might have set this script up they can also access your bank account.
+***BE SMART!*** Please don't run this script on a shared server. If anyone else can access your bash history, or crontab, or anywhere else you might have set this script up they can also access your bank account.
 
 Running the tool without any parameters will give you some details on command line switches:
 
