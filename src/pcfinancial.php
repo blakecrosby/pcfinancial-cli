@@ -82,23 +82,29 @@ foreach ($accountinfo->accountsList as $account) {
 
                 # parse the date range
                 # silly PCF web app expects months to start at 0 instead of 1, silly Java.
-                $date = str_split($options['h'],8);
+                $date = preg_split('/\-/',$options['h']);
                 $start_year = substr($date[0],0,4);
                 $start_month = (substr($date[0],4,2)*1)-1;
                 $start_day = (substr($date[0],6,2))*1;
+
                 $end_year = substr($date[1],0,4);
                 $end_month = (substr($date[1],4,2)*1)-1;
                 $end_day = (substr($date[1],6,2))*1;
-                print "$start_year $start_month $start_day ... $end_year $end_month $end_day\n";
-                get('signOff');
-                die;
 
                 $history = get('transactionHistoryM2',array('fromAccount'=>"$account->accountSlot;$account->transitNumber;$account->accountNumber",'startDate__YEAR'=>$start_year,'startDate__MONTH'=>$start_month,'startDate__DAY' => $start_day,'endDate__YEAR'=>$end_year,'endDate__MONTH'=>$end_month,'endDate__DAY'=>$end_day,'transactionType'=>'','txnMarkerList'=>'','nextFitId'=>'','previousFitId'=>'','lowLimit'=>'','highLimit'=>'','channelId' => 'mobile','cacheid' => '','packageName'=>'Accounts','timestamp' => date("Ynj".intval(date('G').intval(date('i').intval(date('s')))))));
 
-                print_r($history);
+                $completehistory = $history->transactionList;
+
+                # If we have more than 1 "page" of results (> 20)
+                # then lets fetch the rest until there is no more.
+                while ($history->nextPosition != '') {
+                    $completehistory = array_merge($completehistory,$history->transactionList);
+                    $history = get('transactionHistoryM2',array('fromAccount'=>"$account->accountSlot;$account->transitNumber;$account->accountNumber",'startDate__YEAR'=>$start_year,'startDate__MONTH'=>$start_month,'startDate__DAY' => $start_day,'endDate__YEAR'=>$end_year,'endDate__MONTH'=>$end_month,'endDate__DAY'=>$end_day,'transactionType'=>'','txnMarkerList'=>$history->txnMarkerList,'nextFitId'=>$history->nextPosition,'previousFitId'=>'','lowLimit'=>'','highLimit'=>'','channelId' => 'mobile','cacheid' => '','packageName'=>'Accounts','timestamp' => date("Ynj".intval(date('G').intval(date('i').intval(date('s')))))));
+                }
+
 
                 echo sprintf("%-10s %-50.50s %-12s %-12s %-12s\n","Date","Description","Credit","Debit","Balance");
-                foreach ($history->transactionList as $txn){
+                foreach ($completehistory as $txn){
                     echo sprintf("%-10s %-50.50s %-12s %-12s %-12s\n",date("Y-m-d",strtotime($txn->transactionDate)),$txn->transactionDesc,$txn->amountIn,$txn->amountOut,$txn->balance);
                 }
             }
@@ -117,6 +123,7 @@ foreach ($accountinfo->accountsList as $account) {
 get('signOff');
 
 
+# This does the heavy lifting, makes the HTTP calls, etc..
 function get($service,$parameters = Array()) {
     global $posturl;
 
